@@ -1,4 +1,4 @@
-import { INSTRUMENTS, getInstrument } from "@/lib/e8/instruments";
+import { HIP3_INSTRUMENTS, OTHER_INSTRUMENTS, getInstrument, type Instrument } from "@/lib/e8/instruments";
 import type { PortResult } from "@/lib/e8/port";
 import { fmtMoney, fmtPct } from "@/lib/e8/format";
 import { useDesk } from "@/lib/e8/store";
@@ -38,24 +38,18 @@ export function FullPortPanel({ port, dailyDrawdown }: { port: PortResult; daily
         </span>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        {INSTRUMENTS.map((i) => (
-          <button
-            key={i.id}
-            type="button"
-            onClick={() => setInstrumentId(i.id)}
-            className={cn(
-              "rounded-full border px-3 py-2 text-xs",
-              instrumentId === i.id
-                ? "border-primary bg-primary/10 text-primary"
-                : "border-border text-muted hover:text-fg",
-            )}
-          >
-            {i.label}
-            <span className="ml-1.5 font-mono text-subtle">{i.leverage}x</span>
-          </button>
-        ))}
-      </div>
+      <ChipRow
+        label="HIP-3 · 15x (Copper 8x)"
+        items={HIP3_INSTRUMENTS}
+        activeId={instrumentId}
+        onPick={setInstrumentId}
+      />
+      <ChipRow
+        label="Other books"
+        items={OTHER_INSTRUMENTS}
+        activeId={instrumentId}
+        onPick={setInstrumentId}
+      />
 
       <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <label className="grid gap-1">
@@ -109,6 +103,42 @@ export function FullPortPanel({ port, dailyDrawdown }: { port: PortResult; daily
         />
       </div>
     </section>
+  );
+}
+
+function ChipRow({
+  label,
+  items,
+  activeId,
+  onPick,
+}: {
+  label: string;
+  items: Instrument[];
+  activeId: string;
+  onPick: (id: string) => void;
+}) {
+  return (
+    <div className="mt-4">
+      <p className="mb-2 text-[11px] uppercase tracking-wider text-subtle">{label}</p>
+      <div className="flex flex-wrap gap-2">
+        {items.map((i) => (
+          <button
+            key={i.id}
+            type="button"
+            onClick={() => onPick(i.id)}
+            className={cn(
+              "rounded-full border px-3 py-2 text-xs",
+              activeId === i.id
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-border text-muted hover:text-fg",
+            )}
+          >
+            {i.symbol}
+            <span className="ml-1.5 font-mono text-subtle">{i.leverage}x</span>
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AccountBar, Shell } from "@/components/desk/shell";
 import { BookStrip, PathBoard, PlanKpis, PlannerHero } from "@/components/desk/planner";
 import { FullPortPanel } from "@/components/desk/full-port";
+import { PlanOfAttack } from "@/components/desk/plan-of-attack";
 import { ConsistencyGauge } from "@/components/desk/gauge";
 import { DayLog } from "@/components/desk/ledgers";
 import { Badge } from "@/components/ui/badge";
@@ -88,7 +89,7 @@ function Home() {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">40% Consistency Rule</h1>
+              <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">40% Consistency Strategy</h1>
               <Badge tone={stage === "challenge" ? "watch" : plan.barRaised ? "danger" : "ok"}>
                 {stage === "challenge" ? "Challenge — rule off" : PRODUCT_META[product].label + " · " + fmtSize(size)}
               </Badge>
@@ -109,6 +110,18 @@ function Home() {
         <PlanKpis plan={plan} />
         <PathBoard plan={plan} />
         <FullPortPanel port={port} dailyDrawdown={guardrails.dailyDrawdown} />
+        <PlanOfAttack
+          stage={stage}
+          size={size}
+          equity={currentEquity || size}
+          profitTarget={guardrails.profitTarget}
+          cycleProfit={snap.cycleProfit}
+          effectiveTarget={plan.effectiveTarget}
+          maxPrint={stage === "challenge" ? null : plan.maxBestDay}
+          dailyDrawdown={guardrails.dailyDrawdown}
+          winRate={winRatePct / 100}
+          rewardRisk={rewardRisk}
+        />
         <BookStrip plan={plan} suggestedWin={plan.suggestedWin} suggestedRisk={plan.suggestedRisk} />
 
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">

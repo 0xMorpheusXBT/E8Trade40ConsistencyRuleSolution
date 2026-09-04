@@ -12,3 +12,6 @@ screenshots
 artifacts
 attachments
 .DS_Store
+
+.project_id
+.node_modules.lock

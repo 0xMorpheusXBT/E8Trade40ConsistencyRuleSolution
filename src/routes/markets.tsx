@@ -38,6 +38,7 @@ function MarketsPage() {
       return (
         a.symbol.toUpperCase().includes(k) ||
         a.hl.toUpperCase().includes(k) ||
+        a.terminalSymbol.toUpperCase().includes(k) ||
         a.venue.toUpperCase().includes(k)
       );
     });
@@ -46,11 +47,12 @@ function MarketsPage() {
   return (
     <Shell>
       <header className="max-w-3xl">
-        <p className="text-[11px] uppercase tracking-[0.2em] text-primary">E8 Terminal · Asset Universe</p>
-        <h1 className="mt-2 text-3xl font-medium tracking-tight">Hyperliquid + Trade.XYZ</h1>
+        <p className="text-[11px] uppercase tracking-[0.2em] text-primary">E8 Terminal · Asset universe</p>
+        <h1 className="mt-2 text-3xl font-medium tracking-tight">HL perps + Trade.XYZ</h1>
         <p className="mt-3 text-sm text-muted">
-          Every perpetual E8 lists on Hyperliquid native ({HL_NATIVE_COUNT}) and Trade.XYZ HIP-3 ({XYZ_COUNT}).
-          Toggle the venue, then pick a ticker. Sizing on this desk is USD notional — not lots.
+          Official E8 book: {HL_NATIVE_COUNT} Hyperliquid perps (HL_PERP) and {XYZ_COUNT} HIP-3
+          Trade.XYZ markets (HL_HIP3_XYZ). CEX FX/CFD and PARA HIP-3 are not on this desk. Sizing is
+          USD notional.
         </p>
       </header>
 
@@ -83,6 +85,7 @@ function MarketsPage() {
             <thead className="sticky top-0 bg-surface text-left text-[11px] uppercase tracking-wider text-subtle">
               <tr>
                 <th className="px-3 py-2 font-medium">Ticker</th>
+                <th className="px-3 py-2 font-medium">Terminal</th>
                 <th className="px-3 py-2 font-medium">HL name</th>
                 <th className="px-3 py-2 font-medium">Venue</th>
                 <th className="px-3 py-2 font-medium">Class</th>
@@ -91,11 +94,12 @@ function MarketsPage() {
             </thead>
             <tbody>
               {rows.map((a) => (
-                <tr key={a.hl} className="border-t border-border/80">
+                <tr key={a.terminalSymbol} className="border-t border-border/80">
                   <td className="px-3 py-1.5 font-mono">{a.symbol}</td>
+                  <td className="px-3 py-1.5 font-mono text-[11px] text-muted">{a.terminalSymbol}</td>
                   <td className="px-3 py-1.5 font-mono text-xs text-muted">{a.hl}</td>
                   <td className="px-3 py-1.5 text-xs uppercase tracking-wider text-subtle">
-                    {a.dex === "xyz" ? "Trade.XYZ" : a.dex === "native" ? "Hyperliquid" : a.venue}
+                    {a.dex === "xyz" ? "Trade.XYZ" : "Hyperliquid"}
                   </td>
                   <td className="px-3 py-1.5 text-xs text-muted">{a.assetClass}</td>
                   <td className="px-3 py-1.5 font-mono text-xs">{a.maxLeverage}x</td>

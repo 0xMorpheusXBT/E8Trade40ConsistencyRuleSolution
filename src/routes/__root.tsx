@@ -3,7 +3,7 @@ import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
-const APP_NAME = "40% Consistency Rule";
+const APP_NAME = "40% Consistency Strategy";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -15,7 +15,7 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "E8 Markets Terminal planner: pick a 5K–500K funded book, type the money you want, and get risk per trade, dollars per winner, and the exact trade count that stays under the 40% best-day rule.",
+          "E8 Markets Terminal — 40% Consistency Strategy. Pick a 5K–500K funded book, type the money you want, and get risk per trade, dollars per winner, and the exact trade count that stays under the 40% best-day rule.",
       },
     ],
     links: [

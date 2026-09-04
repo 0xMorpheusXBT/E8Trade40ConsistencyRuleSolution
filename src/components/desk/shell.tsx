@@ -8,9 +8,10 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { to: "/", label: "Plan" },
   { to: "/desk", label: "Desk" },
+  { to: "/analytics", label: "Analytics" },
   { to: "/catalog", label: "Offerings" },
   { to: "/markets", label: "Markets" },
-  { to: "/rule", label: "40% Rule" },
+  { to: "/rule", label: "Best Day" },
 ] as const;
 
 export function Shell({ children }: { children: ReactNode }) {
@@ -25,7 +26,7 @@ export function Shell({ children }: { children: ReactNode }) {
               40
             </span>
             <span className="hidden leading-tight sm:block">
-              <span className="block text-sm font-medium tracking-tight">40% Consistency Rule</span>
+              <span className="block text-sm font-medium tracking-tight">40% Consistency Strategy</span>
               <span className="block text-[11px] uppercase tracking-wider text-subtle">E8 Markets Terminal</span>
             </span>
           </Link>

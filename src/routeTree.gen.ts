@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as DeskRouteImport } from './routes/desk'
 import { Route as MarketsRouteImport } from './routes/markets'
@@ -18,6 +19,11 @@ import { Route as RuleRouteImport } from './routes/rule'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CatalogRoute = CatalogRouteImport.update({
@@ -43,6 +49,7 @@ const RuleRoute = RuleRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/catalog': typeof CatalogRoute
   '/desk': typeof DeskRoute
   '/markets': typeof MarketsRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/catalog': typeof CatalogRoute
   '/desk': typeof DeskRoute
   '/markets': typeof MarketsRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/analytics': typeof AnalyticsRoute
   '/catalog': typeof CatalogRoute
   '/desk': typeof DeskRoute
   '/markets': typeof MarketsRoute
@@ -65,14 +74,22 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/catalog' | '/desk' | '/markets' | '/rule'
+  fullPaths: '/' | '/analytics' | '/catalog' | '/desk' | '/markets' | '/rule'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/catalog' | '/desk' | '/markets' | '/rule'
-  id: '__root__' | '/' | '/catalog' | '/desk' | '/markets' | '/rule'
+  to: '/' | '/analytics' | '/catalog' | '/desk' | '/markets' | '/rule'
+  id:
+    | '__root__'
+    | '/'
+    | '/analytics'
+    | '/catalog'
+    | '/desk'
+    | '/markets'
+    | '/rule'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnalyticsRoute: typeof AnalyticsRoute
   CatalogRoute: typeof CatalogRoute
   DeskRoute: typeof DeskRoute
   MarketsRoute: typeof MarketsRoute
@@ -86,6 +103,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/catalog': {
@@ -121,6 +145,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnalyticsRoute: AnalyticsRoute,
   CatalogRoute: CatalogRoute,
   DeskRoute: DeskRoute,
   MarketsRoute: MarketsRoute,
