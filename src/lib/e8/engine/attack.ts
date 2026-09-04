@@ -11,8 +11,9 @@
  * Performance: remaining = effective target − cycle; max print = 40% of target.
  */
 
-import type { Instrument } from "./instruments.ts";
-import { CLASS_RANGE, impliedVolAnn, tapeFor, type MarketTape, type TapeSnapshot } from "./tape.ts";
+import type { Instrument } from "../markets/instruments.ts";
+import { sizedNotional } from "../markets/limits.ts";
+import { CLASS_RANGE, impliedVolAnn, tapeFor, type TapeSnapshot } from "../tape/tape.ts";
 
 export type Persona = "sprint" | "measured" | "vol";
 
@@ -128,7 +129,7 @@ function scoreMarket(
   const dayNtlVlm = m?.dayNtlVlm ?? 0;
   const dayPct = m?.dayPct ?? 0;
 
-  const notional = ctx.equity * inst.leverage * ctx.margin;
+  const notional = sizedNotional(ctx.equity, inst.leverage, ctx.margin, inst.maxNotional);
   const movePct = notional > 0 ? ctx.remaining / notional : 1;
   const movePx = mark * movePct;
   const slPct = notional > 0 ? ctx.daily / notional : 1;
@@ -264,16 +265,25 @@ export function remainingForStage(opts: {
   return Math.max(0, opts.effectiveTarget - opts.cycleProfit);
 }
 
-export function instrumentFromTape(symbol: string, hl: string, venue: string, assetClass: Instrument["assetClass"], leverage: number, mark: number): Instrument {
+export function instrumentFromTape(
+  symbol: string,
+  hl: string,
+  venue: string,
+  assetClass: Instrument["assetClass"],
+  leverage: number,
+  mark: number,
+  maxNotional = Number.POSITIVE_INFINITY,
+): Instrument {
   return {
     id: hl,
     symbol,
     hl,
     label: `${symbol} · ${venue}`,
     venue,
-    book: venue === "Trade.XYZ" || venue === "XYZ" ? "hip-3" : "hip-3",
+    book: venue === "Hyperliquid" ? "hl-perp" : "hip-3",
     assetClass,
     leverage,
+    maxNotional,
     mark,
     note: `${leverage}x on ${venue}.`,
   };

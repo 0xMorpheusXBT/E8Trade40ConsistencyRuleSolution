@@ -52,4 +52,18 @@ describe("E8 Terminal Hyperliquid book", () => {
     assert.ok(xyz.some((a) => a.symbol === "NVDA"));
     assert.equal(searchHlAssets("BTC", 5, "xyz").some((a) => a.symbol === "BTC"), false);
   });
+
+  it("applies E8 contract leverage and $1.3M HIP-3 notional", () => {
+    assert.equal(findHlAsset("BTC")?.maxLeverage, 15);
+    assert.equal(findHlAsset("ETH")?.maxLeverage, 15);
+    assert.equal(findHlAsset("SOL")?.maxLeverage, 15);
+    assert.equal(findHlAsset("SP500")?.maxLeverage, 15);
+    assert.equal(findHlAsset("SP500")?.maxNotional, 1_300_000);
+    assert.equal(findHlAsset("GOLD")?.maxLeverage, 15);
+    assert.equal(findHlAsset("COPPER")?.maxLeverage, 8);
+    assert.equal(findHlAsset("COPPER")?.maxNotional, 1_300_000);
+    assert.equal(findHlAsset("NVDA")?.maxLeverage, 5);
+    assert.equal(findHlAsset("EUR")?.maxLeverage, 25);
+    assert.equal(findHlAsset("CL")?.maxLeverage, 15);
+  });
 });

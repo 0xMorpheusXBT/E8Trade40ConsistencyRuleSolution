@@ -1,4 +1,4 @@
-import { SCRAPE } from "@/lib/e8/catalog";
+import { SCRAPE } from "@/lib/e8/markets/catalog";
 
 const EXAMPLES = {
   pass: [

@@ -1,14 +1,17 @@
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertTriangle, Ban, Scissors } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { SymbolPicker, VenueToggle } from "@/components/desk/symbol-picker";
-import type { ConsistencySnapshot } from "@/lib/e8/consistency";
+import type { ConsistencySnapshot } from "@/lib/e8/engine/consistency";
 import { fmtMoney, clsPnL } from "@/lib/e8/format";
-import { findHlAsset, type VenueFilter } from "@/lib/e8/hl-universe";
-import { useDesk } from "@/lib/e8/store";
+import { findHlAsset, type VenueFilter } from "@/lib/e8/markets/hl-universe";
+import { contractLimits, sizedNotional } from "@/lib/e8/markets/limits";
+import { useDesk } from "@/lib/e8/state/store";
+import { tapeFor } from "@/lib/e8/tape/tape";
+import { useTape } from "@/lib/e8/state/use-tape";
 import { cn } from "@/lib/utils";
 
 export function LiveTradePanel({ snap }: { snap: ConsistencySnapshot }) {
@@ -16,8 +19,23 @@ export function LiveTradePanel({ snap }: { snap: ConsistencySnapshot }) {
   const patchLive = useDesk((s) => s.patchLive);
   const bookLive = useDesk((s) => s.bookLive);
   const setLive = useDesk((s) => s.setLive);
+  const equity = useDesk((s) => s.currentEquity);
   const asset = findHlAsset(live?.symbol);
+  const limits = asset
+    ? contractLimits(asset)
+    : { maxLeverage: 15, maxNotional: Number.POSITIVE_INFINITY };
   const [venue, setVenue] = useState<VenueFilter>("all");
+  const { snap: tape, loading: tapeLoading } = useTape();
+  const quote = live?.symbol ? tapeFor(live.symbol, tape) : undefined;
+
+  useEffect(() => {
+    if (!live?.symbol) return;
+    const t = tapeFor(live.symbol, tape) ?? (asset ? tapeFor(asset.hl, tape) : undefined);
+    if (!t?.mark) return;
+    if (live.mark === 0 || live.entry === 0) {
+      patchLive({ mark: t.mark, entry: live.entry || t.mark });
+    }
+  }, [live?.symbol, tape.at]);
 
   if (!live) {
     return (
@@ -25,18 +43,18 @@ export function LiveTradePanel({ snap }: { snap: ConsistencySnapshot }) {
         <div>
           <h2 className="text-sm font-medium text-fg">Live trade</h2>
           <p className="mt-1 text-sm text-muted">
-            No open position. Pick any Hyperliquid or Trade.XYZ market, then enter USD notional and
-            UP&L from the terminal to run the cut-now check.
+            No open position. Pick any of the 308 Hyperliquid / Trade.XYZ markets — mark, leverage and
+            max notional load from the live book. Then enter USD notional and UP&L.
           </p>
         </div>
         <Button
           variant="outline"
           onClick={() =>
             setLive({
-              symbol: "SP500",
+              symbol: "",
               side: "long",
               openPnl: 0,
-              notional: 100_000,
+              notional: 0,
               entry: 0,
               mark: 0,
             })
@@ -57,6 +75,7 @@ export function LiveTradePanel({ snap }: { snap: ConsistencySnapshot }) {
         ? "watch"
         : "ok";
   const badgeLabel = snap.closeNow ? "Close now" : snap.scaleOut ? "Scale out" : overCap ? "Over cap" : "Tracking";
+  const maxNotion = sizedNotional(equity || 100_000, limits.maxLeverage, 1, limits.maxNotional);
 
   return (
     <div className="flex h-full flex-col gap-4">
@@ -69,8 +88,9 @@ export function LiveTradePanel({ snap }: { snap: ConsistencySnapshot }) {
             </Badge>
           </div>
           <p className="mt-1 font-mono text-xs uppercase tracking-wider text-muted">
-            {live.side} · {live.symbol} · {fmtMoney(live.notional, { compact: true })} notional
-            {asset ? ` · ${asset.dex === "xyz" ? "Trade.XYZ" : asset.dex === "native" ? "Hyperliquid" : asset.venue}` : ""}
+            {live.symbol
+              ? `${live.side} · ${live.symbol} · ${limits.maxLeverage}x · ${fmtMoney(live.notional, { compact: true })} notional${asset ? ` · ${asset.dex === "xyz" ? "Trade.XYZ" : "Hyperliquid"}` : ""}`
+              : "Pick any HL or Trade.XYZ market. Indices are SP500, XYZ100 and JP225 — same 15x / $1.30M contract."}
           </p>
         </div>
         <button className="text-xs text-subtle hover:text-fg" onClick={() => setLive(null)} type="button">
@@ -118,7 +138,22 @@ export function LiveTradePanel({ snap }: { snap: ConsistencySnapshot }) {
 
       <div className="grid grid-cols-2 gap-2">
         <Field label="Symbol">
-          <SymbolPicker value={live.symbol} venue={venue} onChange={(symbol) => patchLive({ symbol })} />
+          <SymbolPicker
+            value={live.symbol}
+            venue={venue}
+            onChange={(_symbol, next) => {
+              const c = contractLimits(next);
+              const t = tapeFor(next.symbol, tape) ?? tapeFor(next.hl, tape);
+              const cap = sizedNotional(equity || 100_000, c.maxLeverage, 1, c.maxNotional);
+              patchLive({
+                symbol: next.symbol,
+                mark: t?.mark ?? 0,
+                entry: t?.mark ?? 0,
+                openPnl: 0,
+                notional: live.notional > 0 ? Math.min(live.notional, cap) : Math.min(100_000, cap),
+              });
+            }}
+          />
         </Field>
         <Field label="Side">
           <div className="flex h-10 overflow-hidden rounded-md border border-border">
@@ -137,14 +172,18 @@ export function LiveTradePanel({ snap }: { snap: ConsistencySnapshot }) {
             ))}
           </div>
         </Field>
-        <Field label="Notional (USD)">
+        <Field label={`Notional (max ${fmtMoney(maxNotion, { compact: true })})`}>
           <Input
             type="number"
-            value={live.notional}
-            onChange={(e) => patchLive({ notional: Number(e.target.value) })}
+            value={live.notional || ""}
+            max={maxNotion}
+            onChange={(e) => {
+              const n = Number(e.target.value);
+              patchLive({ notional: Math.min(n, maxNotion) });
+            }}
           />
         </Field>
-        <Field label="Open P&L (net)">
+        <Field label={`${limits.maxLeverage}x · Open P&L (net)`}>
           <Input
             type="number"
             value={live.openPnl}
@@ -153,12 +192,30 @@ export function LiveTradePanel({ snap }: { snap: ConsistencySnapshot }) {
           />
         </Field>
         <Field label="Entry">
-          <Input type="number" value={live.entry} onChange={(e) => patchLive({ entry: Number(e.target.value) })} />
+          <Input
+            type="number"
+            value={live.entry || ""}
+            onChange={(e) => patchLive({ entry: Number(e.target.value) })}
+          />
         </Field>
         <Field label="Mark">
-          <Input type="number" value={live.mark} onChange={(e) => patchLive({ mark: Number(e.target.value) })} />
+          <Input
+            type="number"
+            value={live.mark || ""}
+            onChange={(e) => patchLive({ mark: Number(e.target.value) })}
+          />
         </Field>
       </div>
+
+      <p className="font-mono text-[11px] uppercase tracking-wider text-subtle">
+        {tapeLoading && !quote
+          ? "Pulling Hyperliquid + Trade.XYZ marks…"
+          : quote
+            ? `Tape ${quote.mark} · 24h ${quote.dayPct >= 0 ? "+" : ""}${(quote.dayPct * 100).toFixed(2)}% · vol ${fmtMoney(quote.dayNtlVlm, { compact: true })} · fund ${(quote.funding * 100).toFixed(4)}% · ${quote.source}`
+            : live.symbol
+              ? "No tape yet for this market — type mark manually."
+              : "308 markets on the wire. Type a ticker or filter by venue."}
+      </p>
 
       <div className="mt-auto flex gap-2">
         <Button className="flex-1" variant={snap.closeNow ? "danger" : "default"} onClick={bookLive}>

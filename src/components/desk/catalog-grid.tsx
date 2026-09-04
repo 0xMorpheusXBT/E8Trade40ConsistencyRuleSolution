@@ -2,7 +2,7 @@
  * E8 One perpetual offerings only. E8 Pro has no 40% consistency rule
  * and is not listed here.
  */
-import { ACCOUNT_SIZES, OFFERINGS, PRODUCT_META, SCRAPE, guardrailsFor } from "@/lib/e8/catalog";
+import { ACCOUNT_SIZES, OFFERINGS, PRODUCT_META, SCRAPE, guardrailsFor } from "@/lib/e8/markets/catalog";
 import { fmtMoney, fmtSize } from "@/lib/e8/format";
 
 export function CatalogGrid() {

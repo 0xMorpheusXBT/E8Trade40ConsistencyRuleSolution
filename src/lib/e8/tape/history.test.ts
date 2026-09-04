@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { demoClosedTrades, demoHistory, netFromGross, parseClosedTrades, rollupDays } from "./history.ts";
-import { evaluateConsistency } from "./consistency.ts";
+import { evaluateConsistency } from "../engine/consistency.ts";
 
 describe("Trade History net of fees", () => {
   it("net = profit − fee", () => {

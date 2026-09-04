@@ -12,6 +12,7 @@ screenshots
 artifacts
 attachments
 .DS_Store
-
+AGENTS.md
 .project_id
 .node_modules.lock
+public/__grok

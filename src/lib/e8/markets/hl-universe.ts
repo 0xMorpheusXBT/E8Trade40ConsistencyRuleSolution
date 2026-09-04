@@ -4,6 +4,7 @@
  * every HL_HIP3_XYZ_*. Felix / para / CEX FX-CFD books are excluded.
  */
 import { E8_BOOK } from "./e8-book.ts";
+import { contractLimits } from "./limits.ts";
 
 export type HlAssetClass = "crypto" | "index" | "fx" | "metal" | "energy" | "equity";
 export type HlBook = "hl-perp" | "hip3-xyz";
@@ -18,10 +19,17 @@ export type HlAsset = {
   assetClass: HlAssetClass;
   book: HlBook;
   maxLeverage: number;
+  maxNotional: number;
   terminalUrl: string;
 };
 
-export const HL_UNIVERSE: readonly HlAsset[] = E8_BOOK;
+/** Seed row before E8 contract overlay (leverage/notional). */
+export type HlAssetSeed = Omit<HlAsset, "maxNotional">;
+
+export const HL_UNIVERSE: readonly HlAsset[] = E8_BOOK.map((a) => {
+  const c = contractLimits(a);
+  return { ...a, maxLeverage: c.maxLeverage, maxNotional: c.maxNotional };
+});
 
 const BY_HL = new Map(HL_UNIVERSE.map((a) => [a.hl.toUpperCase(), a]));
 const BY_TERMINAL = new Map(HL_UNIVERSE.map((a) => [a.terminalSymbol.toUpperCase(), a]));
@@ -31,12 +39,12 @@ export const FEATURED_SYMBOLS = [
   "ETH",
   "SOL",
   "HYPE",
-  "SP500",
-  "CL",
   "GOLD",
+  "CL",
+  "XYZ100",
+  "JP225",
+  "SP500",
   "NVDA",
-  "TSLA",
-  "AAPL",
   "EUR",
   "XRP",
 ] as const;

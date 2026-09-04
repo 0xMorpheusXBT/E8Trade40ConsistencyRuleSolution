@@ -8,10 +8,12 @@ import {
   type AttackFit,
   type AttackRow,
   type Persona,
-} from "@/lib/e8/attack";
+} from "@/lib/e8/engine/attack";
 import { fmtMoney, fmtPct, clsPnL } from "@/lib/e8/format";
-import { HIP3_INSTRUMENTS, getInstrumentBySymbol, type Instrument } from "@/lib/e8/instruments";
-import { useTape } from "@/lib/e8/use-tape";
+import { HIP3_INSTRUMENTS, type Instrument } from "@/lib/e8/markets/instruments";
+import { contractLimits } from "@/lib/e8/markets/limits";
+import { tapeFor } from "@/lib/e8/tape/tape";
+import { useTape } from "@/lib/e8/state/use-tape";
 import { cn } from "@/lib/utils";
 
 const PERSONAS: { id: Persona; label: string; blurb: string }[] = [
@@ -57,8 +59,8 @@ export function PlanOfAttack({
     for (const i of [...HIP3_INSTRUMENTS, ...extra]) {
       if (seen.has(i.hl)) continue;
       seen.add(i.hl);
-      const tape = snap.markets[i.symbol];
-      list.push(tape ? { ...i, mark: tape.mark } : i);
+      const quote = tapeFor(i.symbol, snap) ?? tapeFor(i.hl, snap);
+      list.push(quote ? { ...i, mark: quote.mark } : i);
     }
     return list;
   }, [extra, snap]);
@@ -136,14 +138,18 @@ export function PlanOfAttack({
         <SymbolPicker
           value=""
           onChange={(_symbol, asset) => {
-            const lev = Math.min(15, asset.maxLeverage || 15);
+            const c = contractLimits(asset);
+            const klass =
+              asset.assetClass === "equity" ? "index" : (asset.assetClass as Instrument["assetClass"]);
+            const quote = tapeFor(asset.symbol, snap) ?? tapeFor(asset.hl, snap);
             const inst = instrumentFromTape(
               asset.symbol,
               asset.hl,
               asset.dex === "xyz" ? "Trade.XYZ" : asset.venue,
-              asset.assetClass === "equity" ? "index" : (asset.assetClass as Instrument["assetClass"]),
-              asset.symbol === "COPPER" ? 8 : lev,
-              getInstrumentBySymbol(asset.symbol)?.mark ?? 0,
+              klass,
+              c.maxLeverage,
+              quote?.mark ?? 0,
+              c.maxNotional,
             );
             setExtra((prev) => (prev.some((p) => p.hl === inst.hl) ? prev : [...prev, inst]));
           }}

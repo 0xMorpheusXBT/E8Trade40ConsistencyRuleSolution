@@ -1,7 +1,7 @@
-import { HIP3_INSTRUMENTS, OTHER_INSTRUMENTS, getInstrument, type Instrument } from "@/lib/e8/instruments";
-import type { PortResult } from "@/lib/e8/port";
+import { HIP3_INSTRUMENTS, getInstrument, type Instrument } from "@/lib/e8/markets/instruments";
+import type { PortResult } from "@/lib/e8/engine/port";
 import { fmtMoney, fmtPct } from "@/lib/e8/format";
-import { useDesk } from "@/lib/e8/store";
+import { useDesk } from "@/lib/e8/state/store";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -41,12 +41,6 @@ export function FullPortPanel({ port, dailyDrawdown }: { port: PortResult; daily
       <ChipRow
         label="HIP-3 · 15x (Copper 8x)"
         items={HIP3_INSTRUMENTS}
-        activeId={instrumentId}
-        onPick={setInstrumentId}
-      />
-      <ChipRow
-        label="Other books"
-        items={OTHER_INSTRUMENTS}
         activeId={instrumentId}
         onPick={setInstrumentId}
       />

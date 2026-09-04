@@ -1,4 +1,4 @@
-import type { AccountSize, ProductId, Stage } from "./catalog";
+import type { AccountSize, ProductId, Stage } from "../markets/catalog";
 
 export type LiveTrade = {
   symbol: string;

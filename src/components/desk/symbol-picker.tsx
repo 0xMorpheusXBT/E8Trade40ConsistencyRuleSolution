@@ -6,7 +6,7 @@ import {
   searchHlAssets,
   type HlAsset,
   type VenueFilter,
-} from "@/lib/e8/hl-universe";
+} from "@/lib/e8/markets/hl-universe";
 import { cn } from "@/lib/utils";
 
 const VENUES: { id: VenueFilter; label: string; count: number }[] = [
@@ -59,7 +59,10 @@ export function SymbolPicker({
   const [q, setQ] = useState(value);
   const [active, setActive] = useState(0);
   const box = useRef<HTMLDivElement>(null);
-  const hits = useMemo(() => searchHlAssets(q, venue === "xyz" || venue === "hl" ? 80 : 40, venue), [q, venue]);
+  const hits = useMemo(
+    () => searchHlAssets(q, venue === "all" ? 80 : 320, venue),
+    [q, venue],
+  );
   const placeholder =
     venue === "xyz"
       ? `Search ${XYZ_COUNT} Trade.XYZ markets`
@@ -134,6 +137,7 @@ export function SymbolPicker({
                   <span className="font-mono text-sm">{a.symbol}</span>
                   <span className="truncate text-[11px] uppercase tracking-wider text-subtle">
                     {a.assetClass} · {a.dex === "native" ? "HL" : a.dex === "xyz" ? "XYZ" : a.dex} · {a.maxLeverage}x
+                    {Number.isFinite(a.maxNotional) ? ` · $${(a.maxNotional / 1_000_000).toFixed(2)}M` : ""}
                   </span>
                 </button>
               </li>

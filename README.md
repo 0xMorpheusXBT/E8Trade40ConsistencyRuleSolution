@@ -16,7 +16,24 @@ Canonical sources:
 - Terminal docs: [trade.e8markets.com/docs](https://trade.e8markets.com/docs)
 - Offerings: [e8markets.com · Perpetual · E8 One](https://e8markets.com/?market=perpetual#accounts)
 - Live desk: [trade.e8markets.com/trade](https://trade.e8markets.com/trade)
+- Architecture: [docs/architecture.md](docs/architecture.md) · Engine: [docs/engine.md](docs/engine.md) · Markets: [docs/markets.md](docs/markets.md) · Embed: [docs/terminal-embed.md](docs/terminal-embed.md)
 
+---
+
+## Repository layout
+
+```
+docs/                       Developer handoff (read these first)
+src/lib/e8/                 Framework-free engine — copy this, not the pages
+  engine/                   40% identities, planner, attack, full-port, coach
+  markets/                  E8 One catalog, HIP-3 contract, 308-market book
+  tape/                     Live HL + Trade.XYZ marks, Trade History net of fees
+  state/                    Demo zustand store (do not copy into the terminal)
+  index.ts                  Public barrel
+src/components/desk/        Operator UI (density / copy contract)
+src/routes/                 /  /desk  /analytics  /markets  /catalog  /rule
+migrations/                 tradable_assets seed (unowned catalog)
+```
 ---
 
 ## Why “Strategy”, not “Rule”
@@ -109,7 +126,7 @@ Three desks, one remaining number:
 
 ### Community tool (the Breakout analogue)
 
-Breakout-style calculators work because they are **shareable, standalone, and honest**. A trader should be able to open this without a live account, pick `$100K`, type `$8,000`, and leave with a path. Same math as the terminal. No “demo vs live” split. When we later embed it in Analytics, the public tool and the terminal pane must not diverge — that is why the identities live in `src/lib/e8/*.ts` with tests, not in React.
+Breakout-style calculators work because they are **shareable, standalone, and honest**. A trader should be able to open this without a live account, pick `$100K`, type `$8,000`, and leave with a path. Same math as the terminal. No “demo vs live” split. When we later embed it in Analytics, the public tool and the terminal pane must not diverge — that is why the identities live in `src/lib/e8/engine` with tests, not in React.
 
 Ship the community surface as this repo. Ship the terminal surface as a thin wrapper that feeds MCP account state into the same functions.
 
@@ -133,7 +150,7 @@ Ship the community surface as this repo. Ship the terminal surface as a thin wra
 | Reward / risk | 2R seed | trader | suggested win = risk × R |
 | Trades / day | 2 seed | trader | sessions remaining |
 | Margin used | 100% sprint / 25% measured | 10–100% | Plan of Attack notional |
-| HIP-3 leverage | **15x** (Copper **8x**) | instrument book | `instruments.ts` |
+| HIP-3 leverage | **15x** (Copper **8x**) | instrument book | `markets/limits.ts` |
 | CEX crypto | **1x** | official E8 One | contrast chip |
 | FX | **30x** | official E8 One | contrast chip |
 | Tradable SL floor | **0.35%** | constant | tighter is noise — size notional down |
@@ -175,7 +192,7 @@ liveHeadroom     = todayHeadroom − openUP&L
 closeNow         = live would make today the >40% best day
 ```
 
-Worked help-center identities (must stay green in `src/lib/e8/plan.test.ts` and `history.test.ts`):
+Worked help-center identities (must stay green in `src/lib/e8/engine/plan.test.ts` and `src/lib/e8/tape/history.test.ts`):
 
 - **Example A:** days $500 / $550 / $600 / $700 / $800 → best $800 of $3,150 = 25.4% → **eligible**.
 - **Example B:** best $1,500 of $3,100 = 48.4% → remaining `1500/0.40 − 3100 = $650` → new target **$3,750**.
@@ -200,7 +217,7 @@ Path kinds returned by `planCycle()`:
 openPnl = direction × notional × (mark − entry) / entry
 ```
 
-Full-port identities (`src/lib/e8/port.ts`):
+Full-port identities (`src/lib/e8/engine/port.ts`):
 
 ```
 maxNotional        = equity × leverage
@@ -210,7 +227,7 @@ tradable floor     = 0.35% stop — tighter is noise, size the notional down
 
 A 15x full-port on a $100K E8 One (daily DD $4,000) that uses the whole daily DD as 1R prints **$8,000 at 2R**. That is a consistency lock on an $8k target.
 
-Plan of Attack identities (`src/lib/e8/attack.ts`):
+Plan of Attack identities (`src/lib/e8/engine/attack.ts`):
 
 ```
 notional           = equity × leverage × marginUse
@@ -244,7 +261,7 @@ HIP-3 15x book the full-port panel sizes against (Copper is **8x**):
 
 The 2026-09-04 Chief HL $500K session rotated **BTCUSD → SP500 HIP-3** at 15x, **~$1.24M notional**. That ticket is the sample live position.
 
-Postgres seed: `migrations/0002_e8_tradable_assets.sql` → table `tradable_assets` (unowned public catalog). Client universe: `src/lib/e8/e8-book.ts`. Search / venue toggle: `src/lib/e8/hl-universe.ts`.
+Postgres seed: `migrations/0002_e8_tradable_assets.sql` → table `tradable_assets` (unowned public catalog). Client universe: `src/lib/e8/markets/e8-book.ts`. Search / venue toggle: `src/lib/e8/markets/hl-universe.ts`.
 
 ---
 
@@ -311,30 +328,33 @@ This overlay **never sends orders**. `trade:execute` is out of scope.
 Keep this layer **framework-free**. React is the demo. The terminal should import the `src/lib/e8` functions, not the pages.
 
 ```
-src/lib/e8/consistency.ts     40% identities (help 10450125)
-src/lib/e8/plan.ts            funded-target planner, PathKind
-src/lib/e8/port.ts            full-port notional / tight SL vs daily DD
-src/lib/e8/attack.ts          Plan of Attack — sprint / measured / vol
-src/lib/e8/tape.ts            4h expansion, 24h move, IV proxy
-src/lib/e8/tape.server.ts     Hyperliquid info API (meta + 4h candles)
-src/lib/e8/history.ts         Trade History → Net PNL day rollup
-src/lib/e8/history.server.ts  MCP e8_orders_list, fallback replay
-src/lib/e8/e8-book.ts         308 official E8 HL_PERP + HIP3_XYZ markets
-src/lib/e8/hl-universe.ts     search, venue toggle, terminal-symbol lookup
-src/lib/e8/instruments.ts     HIP-3 15x book (Copper 8x)
-src/lib/e8/catalog.ts         E8 One only
-src/lib/e8/analytics.ts       win rate, R, expectancy, coach cards
-src/lib/e8/assets.functions.ts  Postgres tradable_assets (unowned)
+src/lib/e8/engine/consistency.ts   40% identities (help 10450125)
+src/lib/e8/engine/plan.ts          funded-target planner, PathKind
+src/lib/e8/engine/port.ts          full-port notional / tight SL vs daily DD
+src/lib/e8/engine/attack.ts        Plan of Attack — sprint / measured / vol
+src/lib/e8/tape/tape.ts            4h expansion, 24h move, IV proxy
+src/lib/e8/tape/tape.server.ts     Hyperliquid info API (meta + 4h candles)
+src/lib/e8/tape/history.ts         Trade History → Net PNL day rollup
+src/lib/e8/tape/history.server.ts  MCP e8_orders_list, fallback replay
+src/lib/e8/markets/e8-book.ts      308 official E8 HL_PERP + HIP3_XYZ markets
+src/lib/e8/markets/hl-universe.ts  search, venue toggle, terminal-symbol lookup
+src/lib/e8/markets/instruments.ts  HIP-3 15x book (Copper 8x)
+src/lib/e8/markets/limits.ts       15x / 8x / 25x / 5x + $1.30M venue cap
+src/lib/e8/markets/catalog.ts      E8 One only
+src/lib/e8/engine/analytics.ts     win rate, R, expectancy, coach cards
+src/lib/e8/assets.functions.ts     Postgres tradable_assets (unowned)
 migrations/0002_e8_tradable_assets.sql
 ```
 
 Tests (must stay green — these *are* the spec):
 
 ```
-src/lib/e8/plan.test.ts         Example A / B, 100K $8k path, 15x BTC full-port lock
-src/lib/e8/history.test.ts      Net = profit − fee, UTC day grouping
-src/lib/e8/attack.test.ts       Eval $9k @ 15x BTC = 0.60% one-print; Copper 8x; funded lock
-src/lib/e8/hl-universe.test.ts  227 + 81 = 308, HL_PERP_BTC / HL_HIP3_XYZ_SP500
+src/lib/e8/engine/plan.test.ts          Example A / B, 100K $8k path, 15x BTC full-port lock
+src/lib/e8/tape/history.test.ts         Net = profit − fee, UTC day grouping
+src/lib/e8/engine/attack.test.ts        Eval $9k @ 15x BTC = 0.60% one-print; Copper 8x; funded lock
+src/lib/e8/markets/hl-universe.test.ts  227 + 81 = 308, HL_PERP_BTC / HL_HIP3_XYZ_SP500
+src/lib/e8/markets/limits.test.ts       15x / 8x / 25x / 5x + $1.30M
+src/lib/e8/tape/tape.test.ts            SP500 / xyz:NVDA hydrate
 ```
 
 ```

@@ -3,9 +3,9 @@
  * (2026-09-04). HL_PERP_* native Hyperliquid + HL_HIP3_XYZ_* Trade.XYZ.
  * PARA HIP-3 and CEX FX/CFD/futures are out of scope.
  */
-import type { HlAsset } from "./hl-universe.ts";
+import type { HlAssetSeed } from "./hl-universe.ts";
 
-export const E8_BOOK: readonly HlAsset[] = [
+export const E8_BOOK: readonly HlAssetSeed[] = [
   { terminalSymbol: "HL_PERP_AAVE", symbol: "AAVE", hl: "AAVE", dex: "native", venue: "Hyperliquid", name: "AAVE perpetual on Hyperliquid", assetClass: "crypto", book: "hl-perp", maxLeverage: 10, terminalUrl: "https://trade.e8markets.com/trade?symbol=HL_PERP_AAVE&period=15m" },
   { terminalSymbol: "HL_PERP_ACE", symbol: "ACE", hl: "ACE", dex: "native", venue: "Hyperliquid", name: "ACE perpetual on Hyperliquid", assetClass: "crypto", book: "hl-perp", maxLeverage: 3, terminalUrl: "https://trade.e8markets.com/trade?symbol=HL_PERP_ACE&period=15m" },
   { terminalSymbol: "HL_PERP_ADA", symbol: "ADA", hl: "ADA", dex: "native", venue: "Hyperliquid", name: "ADA perpetual on Hyperliquid", assetClass: "crypto", book: "hl-perp", maxLeverage: 10, terminalUrl: "https://trade.e8markets.com/trade?symbol=HL_PERP_ADA&period=15m" },

@@ -2,10 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AccountBar, Shell } from "@/components/desk/shell";
 import { PlanOfAttack } from "@/components/desk/plan-of-attack";
 import { Badge } from "@/components/ui/badge";
-import { evaluateConsistency, isoToday } from "@/lib/e8/consistency";
-import { getOffering, guardrailsFor } from "@/lib/e8/catalog";
-import { planCycle } from "@/lib/e8/plan";
-import { asDayPnls, useDesk, useDeskHydrated } from "@/lib/e8/store";
+import { evaluateConsistency, isoToday } from "@/lib/e8/engine/consistency";
+import { getOffering, guardrailsFor } from "@/lib/e8/markets/catalog";
+import { planCycle } from "@/lib/e8/engine/plan";
+import { asDayPnls, useDesk, useDeskHydrated } from "@/lib/e8/state/store";
 import { fmtSize } from "@/lib/e8/format";
 
 export const Route = createFileRoute("/analytics")({ component: AnalyticsPage });

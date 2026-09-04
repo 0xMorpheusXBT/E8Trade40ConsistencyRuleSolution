@@ -6,12 +6,12 @@ import { PlanOfAttack } from "@/components/desk/plan-of-attack";
 import { ConsistencyGauge } from "@/components/desk/gauge";
 import { DayLog } from "@/components/desk/ledgers";
 import { Badge } from "@/components/ui/badge";
-import { evaluateConsistency, isoToday } from "@/lib/e8/consistency";
-import { getOffering, guardrailsFor, PRODUCT_META } from "@/lib/e8/catalog";
-import { getInstrument } from "@/lib/e8/instruments";
-import { planCycle } from "@/lib/e8/plan";
-import { sizeFullPort } from "@/lib/e8/port";
-import { asDayPnls, useDesk, useDeskHydrated } from "@/lib/e8/store";
+import { evaluateConsistency, isoToday } from "@/lib/e8/engine/consistency";
+import { getOffering, guardrailsFor, PRODUCT_META } from "@/lib/e8/markets/catalog";
+import { getInstrument } from "@/lib/e8/markets/instruments";
+import { planCycle } from "@/lib/e8/engine/plan";
+import { sizeFullPort } from "@/lib/e8/engine/port";
+import { asDayPnls, useDesk, useDeskHydrated } from "@/lib/e8/state/store";
 import { fmtSize } from "@/lib/e8/format";
 
 export const Route = createFileRoute("/")({ component: Home });
@@ -73,6 +73,7 @@ function Home() {
     maxBestDay: plan.maxBestDay,
     todayHeadroom: snap.todayHeadroom,
     targetProfit: plan.effectiveTarget,
+    venueMaxNotional: inst.maxNotional,
   });
 
   if (!hydrated) {

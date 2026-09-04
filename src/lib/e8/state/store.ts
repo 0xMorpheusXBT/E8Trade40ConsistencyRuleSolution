@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { uid } from "@/lib/utils";
-import { ACCOUNT_SIZES, getOffering, guardrailsFor, type AccountSize, type ProductId, type Stage } from "./catalog";
-import { isoToday, type DayPnl } from "./consistency";
-import type { Trade } from "./analytics";
+import { ACCOUNT_SIZES, getOffering, guardrailsFor, type AccountSize, type ProductId, type Stage } from "../markets/catalog";
+import { isoToday, type DayPnl } from "../engine/consistency";
+import type { Trade } from "../engine/analytics";
 import type { DayRow, LiveTrade } from "./types";
-import type { HistorySnapshot } from "./history";
-import { SAMPLE_DAYS, SAMPLE_LIVE, SAMPLE_TRADES } from "./seed";
-import { defaultTargetProfit } from "./plan";
-import { INSTRUMENTS } from "./instruments";
+import type { HistorySnapshot } from "../tape/history";
+import { SAMPLE_DAYS, SAMPLE_LIVE, SAMPLE_TRADES } from "../tape/seed";
+import { defaultTargetProfit } from "../engine/plan";
+import { INSTRUMENTS } from "../markets/instruments";
 
 export type { LiveTrade, DayRow };
 
@@ -233,10 +233,10 @@ export const useDesk = create<DeskState & DeskActions>()(
         const live = get().live;
         if (!live) return;
         const next = { ...live, ...patch };
-        if (patch.mark != null && live.entry) {
-          const dir = live.side === "long" ? 1 : -1;
+        if (patch.openPnl == null && patch.mark != null && next.entry) {
+          const dir = next.side === "long" ? 1 : -1;
           const notion = next.notional || live.notional;
-          next.openPnl = Math.round(dir * notion * ((patch.mark - live.entry) / live.entry) * 100) / 100;
+          next.openPnl = Math.round(dir * notion * ((next.mark - next.entry) / next.entry) * 100) / 100;
         }
         set({ live: next });
       },

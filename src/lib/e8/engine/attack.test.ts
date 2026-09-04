@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { remainingForStage, planAttack } from "./attack.ts";
-import { HIP3_INSTRUMENTS, getInstrument } from "./instruments.ts";
-import { TAPE_FALLBACK } from "./tape.ts";
+import { HIP3_INSTRUMENTS, getInstrument } from "../markets/instruments.ts";
+import { TAPE_FALLBACK } from "../tape/tape.ts";
 
 const btc = getInstrument("btc-hl-15x");
 const sp = getInstrument("sp500-hl-15x");
@@ -103,5 +103,26 @@ describe("plan of attack", () => {
     );
     assert.equal(plan.rows[0].leverage, 8);
     assert.equal(plan.rows[0].notional, 800_000);
+  });
+
+  it("SP500 full-port clips at $1.30M venue cap", () => {
+    const plan = planAttack(
+      {
+        stage: "challenge",
+        size: 100_000,
+        equity: 100_000,
+        remaining: 9_000,
+        maxPrint: null,
+        dailyDrawdown: 4_000,
+        winRate: 0.55,
+        rewardRisk: 2,
+        marginUse: 1,
+        persona: "sprint",
+      },
+      [sp],
+      TAPE_FALLBACK,
+    );
+    assert.equal(plan.rows[0].leverage, 15);
+    assert.equal(plan.rows[0].notional, 1_300_000);
   });
 });

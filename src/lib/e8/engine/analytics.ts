@@ -1,5 +1,5 @@
 import type { ConsistencySnapshot } from "./consistency";
-import type { Guardrails } from "./catalog";
+import type { Guardrails } from "../markets/catalog";
 
 export type Trade = {
   id: string;

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { pullTradeHistory } from "./history.functions";
+import { pullTradeHistory } from "../tape/history.functions";
 import { useDesk, useDeskHydrated } from "./store";
 
 const KEY_STORAGE = "e8-terminal-read-key";

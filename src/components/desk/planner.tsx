@@ -1,7 +1,7 @@
-import type { CyclePlan } from "@/lib/e8/plan";
-import { plannedDays } from "@/lib/e8/plan";
+import type { CyclePlan } from "@/lib/e8/engine/plan";
+import { plannedDays } from "@/lib/e8/engine/plan";
 import { fmtMoney, fmtPct } from "@/lib/e8/format";
-import { useDesk } from "@/lib/e8/store";
+import { useDesk } from "@/lib/e8/state/store";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

@@ -1,8 +1,8 @@
-import { coach, computeStats, type CoachCard } from "@/lib/e8/analytics";
-import type { ConsistencySnapshot } from "@/lib/e8/consistency";
-import { getOffering, guardrailsFor } from "@/lib/e8/catalog";
+import { coach, computeStats, type CoachCard } from "@/lib/e8/engine/analytics";
+import type { ConsistencySnapshot } from "@/lib/e8/engine/consistency";
+import { getOffering, guardrailsFor } from "@/lib/e8/markets/catalog";
 import { fmtMoney, fmtPct, fmtRatio } from "@/lib/e8/format";
-import { useDesk } from "@/lib/e8/store";
+import { useDesk } from "@/lib/e8/state/store";
 import { cn } from "@/lib/utils";
 
 export function CoachPanel({ snap }: { snap: ConsistencySnapshot }) {

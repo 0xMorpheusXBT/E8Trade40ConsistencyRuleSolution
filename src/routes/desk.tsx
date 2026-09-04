@@ -6,9 +6,9 @@ import { DayLog, TradeLog } from "@/components/desk/ledgers";
 import { CoachPanel } from "@/components/desk/coach-panel";
 import { ImportStrip } from "@/components/desk/import-strip";
 import { Badge } from "@/components/ui/badge";
-import { evaluateConsistency, isoToday } from "@/lib/e8/consistency";
-import { getOffering, PRODUCT_META } from "@/lib/e8/catalog";
-import { asDayPnls, useDesk, useDeskHydrated } from "@/lib/e8/store";
+import { evaluateConsistency, isoToday } from "@/lib/e8/engine/consistency";
+import { getOffering, PRODUCT_META } from "@/lib/e8/markets/catalog";
+import { asDayPnls, useDesk, useDeskHydrated } from "@/lib/e8/state/store";
 import { fmtSize } from "@/lib/e8/format";
 
 export const Route = createFileRoute("/desk")({ component: DeskPage });

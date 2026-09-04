@@ -1,4 +1,4 @@
-import type { ConsistencySnapshot } from "@/lib/e8/consistency";
+import type { ConsistencySnapshot } from "@/lib/e8/engine/consistency";
 import { fmtMoney, fmtPct } from "@/lib/e8/format";
 import { cn } from "@/lib/utils";
 

@@ -33,6 +33,8 @@ export type PortInput = {
   maxBestDay: number;
   todayHeadroom: number | null;
   targetProfit: number;
+  /** Venue position cap (HIP-3 $1.30M). Omit for uncapped native. */
+  venueMaxNotional?: number;
 };
 
 export type PortResult = {
@@ -66,7 +68,9 @@ export function sizeFullPort(input: PortInput): PortResult {
   const lev = Math.max(1, input.leverage);
   const equity = Math.max(1, input.equity);
   const price = Math.max(1e-8, input.price);
-  const maxNotional = equity * lev;
+  const uncapped = equity * lev;
+  const cap = input.venueMaxNotional != null && Number.isFinite(input.venueMaxNotional) ? input.venueMaxNotional : uncapped;
+  const maxNotional = Math.min(uncapped, cap);
   const requiredMargin = maxNotional / lev; // = equity when truly full-port
   const daily = Math.max(0, input.dailyDrawdown);
   const risk = Math.max(1, input.riskDollars);

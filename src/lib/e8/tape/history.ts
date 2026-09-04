@@ -12,8 +12,8 @@
  * terminal feed is wired to E8's trading-day clock.
  */
 
-import type { Trade } from "./analytics";
-import type { DayRow } from "./types";
+import type { Trade } from "../engine/analytics";
+import type { DayRow } from "../state/types";
 
 export type ClosedTrade = {
   id: string;

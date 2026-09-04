@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ACCOUNT_SIZES } from "@/lib/e8/catalog";
+import { ACCOUNT_SIZES } from "@/lib/e8/markets/catalog";
 import { fmtSize } from "@/lib/e8/format";
-import { useDesk } from "@/lib/e8/store";
+import { useDesk } from "@/lib/e8/state/store";
 import { cn } from "@/lib/utils";
 
 const NAV = [

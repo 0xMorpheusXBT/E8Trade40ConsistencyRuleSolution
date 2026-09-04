@@ -2,14 +2,14 @@ import { useState } from "react";
 import { ChevronDown, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { isoToday } from "@/lib/e8/consistency";
+import { isoToday } from "@/lib/e8/engine/consistency";
 import { clsPnL, fmtMoney } from "@/lib/e8/format";
-import { fmtPulledAt } from "@/lib/e8/history";
-import { useDesk } from "@/lib/e8/store";
-import { useHistorySync } from "@/lib/e8/use-history-sync";
+import { fmtPulledAt } from "@/lib/e8/tape/history";
+import { useDesk } from "@/lib/e8/state/store";
+import { useHistorySync } from "@/lib/e8/state/use-history-sync";
 import { cn } from "@/lib/utils";
 import { SymbolPicker, VenueToggle } from "@/components/desk/symbol-picker";
-import { HL_COUNT, type VenueFilter } from "@/lib/e8/hl-universe";
+import { HL_COUNT, type VenueFilter } from "@/lib/e8/markets/hl-universe";
 
 export function DayLog() {
   const days = useDesk((s) => s.days);
@@ -256,7 +256,7 @@ export function TradeLog() {
   const trades = useDesk((s) => s.trades);
   const addTrade = useDesk((s) => s.addTrade);
   const removeTrade = useDesk((s) => s.removeTrade);
-  const [symbol, setSymbol] = useState("SP500");
+  const [symbol, setSymbol] = useState("");
   const [pnl, setPnl] = useState("");
   const [risk, setRisk] = useState("");
   const [side, setSide] = useState<"long" | "short">("long");

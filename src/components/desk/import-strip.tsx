@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { getOffering, guardrailsFor } from "@/lib/e8/catalog";
+import { getOffering, guardrailsFor } from "@/lib/e8/markets/catalog";
 import { fmtMoney } from "@/lib/e8/format";
-import { fmtPulledAt } from "@/lib/e8/history";
-import { useDesk } from "@/lib/e8/store";
-import { readTerminalKey, writeTerminalKey } from "@/lib/e8/use-history-sync";
+import { fmtPulledAt } from "@/lib/e8/tape/history";
+import { useDesk } from "@/lib/e8/state/store";
+import { readTerminalKey, writeTerminalKey } from "@/lib/e8/state/use-history-sync";
 
 export function ImportStrip() {
   const product = useDesk((s) => s.product);
